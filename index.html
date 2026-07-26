@@ -1,0 +1,2557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>CA Study Command Centre</title>
+  <style>
+    /* --- CSS RESET & VARIABLES --- */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    :root {
+      --bg-color: #0d0d0d;
+      --surface-color: #1a1a1a;
+      --card-bg: #222222;
+      --accent-gold: #f0b429;
+      --success-green: #22c55e;
+      --danger-red: #ef4444;
+      --warning-amber: #f59e0b;
+      --text-main: #f5f5f5;
+      --text-muted: #888888;
+      --blue-accent: #3b82f6;
+      --purple-accent: #a855f7;
+      --cyan-accent: #06b6d4;
+      --border-color: #333333;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      display: flex;
+      justify-content: center;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    .app-container {
+      width: 100%;
+      max-width: 430px;
+      background-color: var(--bg-color);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      padding-top: 60px;
+      padding-bottom: 75px;
+    }
+
+    /* --- FIXED TOP HEADER --- */
+    .top-header {
+      position: fixed;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100%;
+      max-width: 430px;
+      height: 60px;
+      background-color: rgba(26, 26, 26, 0.95);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+      z-index: 100;
+    }
+
+    .app-title-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .app-title {
+      font-size: 17px;
+      font-weight: 800;
+      letter-spacing: -0.3px;
+      color: var(--accent-gold);
+    }
+
+    .header-sim-tag {
+      font-size: 10px;
+      background: rgba(240, 180, 41, 0.15);
+      color: var(--accent-gold);
+      padding: 2px 6px;
+      border-radius: 4px;
+      border: 1px solid rgba(240, 180, 41, 0.3);
+    }
+
+    .header-level-badge {
+      background: linear-gradient(135deg, var(--surface-color), #2d2d2d);
+      border: 1px solid var(--accent-gold);
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--accent-gold);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      min-height: 36px;
+    }
+
+    /* --- BOTTOM NAVIGATION BAR --- */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100%;
+      max-width: 430px;
+      height: 65px;
+      background-color: rgba(26, 26, 26, 0.98);
+      backdrop-filter: blur(10px);
+      border-top: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      z-index: 100;
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      width: 20%;
+      height: 100%;
+      transition: all 0.2s ease;
+      background: none;
+      border: none;
+    }
+
+    .nav-item .nav-icon {
+      font-size: 20px;
+      margin-bottom: 2px;
+    }
+
+    .nav-item.active {
+      color: var(--accent-gold);
+    }
+
+    /* --- CONTENT AREA & TAB VIEWS --- */
+    .main-content {
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      width: 100%;
+    }
+
+    .tab-view {
+      display: none;
+      flex-direction: column;
+      gap: 16px;
+      animation: fadeIn 0.2s ease-in-out;
+    }
+
+    .tab-view.active {
+      display: flex;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* --- COMMON COMPONENTS --- */
+    .card {
+      background-color: var(--card-bg);
+      border-radius: 14px;
+      padding: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+
+    .card-title {
+      font-size: 15px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: var(--text-main);
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 44px;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 700;
+      border: none;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      gap: 6px;
+    }
+
+    .btn:active {
+      transform: scale(0.97);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent-gold), #d99b1c);
+      color: #000;
+    }
+
+    .btn-secondary {
+      background-color: var(--surface-color);
+      color: var(--text-main);
+      border: 1px solid var(--border-color);
+    }
+
+    .btn-danger {
+      background-color: var(--danger-red);
+      color: #fff;
+    }
+
+    .btn-sm {
+      min-height: 36px;
+      padding: 6px 12px;
+      font-size: 12px;
+    }
+
+    .input-field, .select-field, .textarea-field {
+      width: 100%;
+      min-height: 44px;
+      background-color: var(--surface-color);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      color: var(--text-main);
+      padding: 10px 14px;
+      font-size: 14px;
+      outline: none;
+    }
+
+    .input-field:focus, .select-field:focus, .textarea-field:focus {
+      border-color: var(--accent-gold);
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .badge-gold { background: rgba(240, 180, 41, 0.2); color: var(--accent-gold); border: 1px solid var(--accent-gold); }
+    .badge-red { background: rgba(239, 68, 68, 0.2); color: var(--danger-red); border: 1px solid var(--danger-red); }
+    .badge-green { background: rgba(34, 197, 94, 0.2); color: var(--success-green); border: 1px solid var(--success-green); }
+    .badge-amber { background: rgba(245, 158, 11, 0.2); color: var(--warning-amber); border: 1px solid var(--warning-amber); }
+    .badge-blue { background: rgba(59, 130, 246, 0.2); color: var(--blue-accent); border: 1px solid var(--blue-accent); }
+
+    /* Progress Bar */
+    .progress-bar-container {
+      width: 100%;
+      height: 10px;
+      background-color: var(--surface-color);
+      border-radius: 6px;
+      overflow: hidden;
+      margin: 8px 0;
+      position: relative;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent-gold), #fbbf24);
+      border-radius: 6px;
+      transition: width 0.3s ease;
+    }
+
+    /* --- CHARACTER VISUAL STYLES & ANIMATIONS --- */
+    .character-card {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .character-figure-wrap {
+      width: 80px;
+      height: 90px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    .character-figure {
+      width: 44px;
+      height: 60px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+      z-index: 2;
+      animation: floatIdle 3s ease-in-out infinite;
+    }
+
+    @keyframes floatIdle {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-4px); }
+    }
+
+    .char-head {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: #555;
+      margin-bottom: 2px;
+      position: relative;
+    }
+
+    .char-body {
+      width: 32px;
+      height: 32px;
+      border-radius: 6px 6px 12px 12px;
+      background: #444;
+      position: relative;
+    }
+
+    .char-aura {
+      position: absolute;
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      bottom: 5px;
+      z-index: 1;
+      animation: auraPulse 2s ease-in-out infinite alternate;
+    }
+
+    @keyframes auraPulse {
+      0% { transform: scale(0.9); opacity: 0.5; }
+      100% { transform: scale(1.15); opacity: 0.9; }
+    }
+
+    /* Stage 0 - Level 0 */
+    .stage-0 .char-head, .stage-0 .char-body { background: #555; }
+    .stage-0 .char-aura { display: none; }
+
+    /* Stage 1 - Level 1-2 (Iron) */
+    .stage-1 .char-head, .stage-1 .char-body { background: #3b82f6; border: 1px solid #60a5fa; }
+    .stage-1 .char-aura { background: radial-gradient(circle, rgba(59, 130, 246, 0.4) 0%, transparent 70%); }
+
+    /* Stage 2 - Level 3-5 (Bronze) */
+    .stage-2 .char-head, .stage-2 .char-body { background: #d97706; border: 1px solid #f59e0b; }
+    .stage-2 .char-aura { background: radial-gradient(circle, rgba(217, 119, 6, 0.5) 0%, transparent 70%); }
+
+    /* Stage 3 - Level 6-9 (Silver) */
+    .stage-3 .char-head, .stage-3 .char-body { background: #9ca3af; border: 1px solid #e5e7eb; box-shadow: 0 0 10px rgba(229, 231, 235, 0.5); }
+    .stage-3 .char-aura { background: radial-gradient(circle, rgba(156, 163, 175, 0.6) 0%, transparent 70%); }
+
+    /* Stage 4 - Level 10-14 (Gold) */
+    .stage-4 .char-head, .stage-4 .char-body { background: #f59e0b; border: 1px solid #fbbf24; box-shadow: 0 0 15px rgba(251, 191, 36, 0.7); }
+    .stage-4 .char-aura { background: radial-gradient(circle, rgba(245, 158, 11, 0.7) 0%, transparent 70%); }
+
+    /* Stage 5 - Level 15-19 (Platinum) */
+    .stage-5 .char-head, .stage-5 .char-body { background: #8b5cf6; border: 1px solid #c084fc; box-shadow: 0 0 18px rgba(192, 132, 252, 0.8); }
+    .stage-5 .char-aura { background: radial-gradient(circle, rgba(139, 92, 246, 0.8) 0%, transparent 70%); }
+
+    /* Stage 6 - Level 20-24 (Diamond) */
+    .stage-6 .char-head, .stage-6 .char-body { background: #06b6d4; border: 1px solid #22d3ee; box-shadow: 0 0 20px rgba(34, 211, 238, 0.9); }
+    .stage-6 .char-aura { background: radial-gradient(circle, rgba(6, 182, 212, 0.85) 0%, transparent 70%); }
+
+    /* Stage 7 - Level 25-29 (Shadow Initiate) */
+    .stage-7 .char-head, .stage-7 .char-body { background: #4c1d95; border: 1px solid #7c3aed; box-shadow: 0 0 25px rgba(124, 58, 237, 0.95); }
+    .stage-7 .char-aura { background: radial-gradient(circle, rgba(76, 29, 149, 0.9) 0%, transparent 70%); }
+
+    /* Stage 8 - Level 30+ (Shadow Monarch) */
+    .stage-8 .char-head, .stage-8 .char-body { background: #000; border: 2px solid #a855f7; box-shadow: 0 0 30px rgba(168, 85, 247, 1); }
+    .stage-8 .char-aura { background: radial-gradient(circle, rgba(168, 85, 247, 1) 0%, transparent 70%); animation: purpleFire 1.5s infinite alternate; }
+
+    @keyframes purpleFire {
+      0% { transform: scale(0.95) rotate(-5deg); }
+      100% { transform: scale(1.25) rotate(5deg); }
+    }
+
+    .char-badge-icon {
+      position: absolute;
+      top: -8px;
+      right: -8px;
+      font-size: 16px;
+      z-index: 5;
+    }
+
+    .pulsing-fire {
+      display: inline-block;
+      animation: firePulse 0.8s ease-in-out infinite alternate;
+    }
+
+    @keyframes firePulse {
+      0% { transform: scale(1); }
+      100% { transform: scale(1.3); }
+    }
+
+    /* --- SRS TODAY'S REVISIONS WIDGET --- */
+    .revision-item {
+      background-color: var(--surface-color);
+      border-radius: 10px;
+      padding: 12px;
+      border: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .revision-item.overdue {
+      background-color: #2a1215;
+      border-color: var(--danger-red);
+    }
+
+    .revision-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+
+    .revision-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 4px;
+    }
+
+    .btn-srs-hard { flex: 1; background: #3f1d1d; color: #f87171; border: 1px solid #7f1d1d; }
+    .btn-srs-ok { flex: 1; background: #1e293b; color: #38bdf8; border: 1px solid #0369a1; }
+    .btn-srs-easy { flex: 1; background: #14532d; color: #4ade80; border: 1px solid #15803d; }
+
+    /* --- SYLLABUS ACCORDION & CHAPTER TILES --- */
+    .paper-accordion {
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      overflow: hidden;
+      margin-bottom: 12px;
+      background-color: var(--card-bg);
+    }
+
+    .paper-header {
+      padding: 14px 16px;
+      background-color: var(--surface-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 15px;
+    }
+
+    .paper-content {
+      display: none;
+      padding: 12px;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .paper-accordion.open .paper-content {
+      display: flex;
+    }
+
+    .chapter-tile {
+      background-color: var(--surface-color);
+      border-radius: 10px;
+      padding: 12px;
+      border: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .chapter-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 8px;
+    }
+
+    .status-pill {
+      cursor: pointer;
+      user-select: none;
+      min-height: 28px;
+    }
+
+    .star-rating {
+      display: flex;
+      gap: 4px;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    .star-rating .star.active-1, .star-rating .star.active-2 { color: var(--danger-red); }
+    .star-rating .star.active-3 { color: var(--warning-amber); }
+    .star-rating .star.active-4, .star-rating .star.active-5 { color: var(--success-green); }
+
+    /* --- PLANNER WEEK STRIP & TASK ROW --- */
+    .week-strip {
+      display: flex;
+      justify-content: space-between;
+      background-color: var(--surface-color);
+      padding: 8px;
+      border-radius: 12px;
+      border: 1px solid var(--border-color);
+    }
+
+    .day-pill {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 6px 10px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 700;
+      gap: 2px;
+      min-width: 44px;
+    }
+
+    .day-pill.active {
+      background-color: var(--accent-gold);
+      color: #000;
+    }
+
+    .task-row {
+      background-color: var(--surface-color);
+      border-radius: 10px;
+      padding: 12px;
+      border: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      position: relative;
+    }
+
+    .task-row.done {
+      border-left: 4px solid var(--success-green);
+      opacity: 0.8;
+    }
+
+    .task-row.missed {
+      border-left: 4px solid var(--danger-red);
+    }
+
+    .task-checkbox {
+      width: 24px;
+      height: 24px;
+      border-radius: 6px;
+      border: 2px solid var(--accent-gold);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .task-checkbox.checked {
+      background-color: var(--accent-gold);
+      color: #000;
+    }
+
+    /* Floating XP Animation */
+    .floating-xp {
+      position: absolute;
+      right: 16px;
+      top: -10px;
+      color: var(--accent-gold);
+      font-weight: 800;
+      font-size: 14px;
+      animation: floatUp 1s ease-out forwards;
+      pointer-events: none;
+    }
+
+    @keyframes floatUp {
+      0% { opacity: 1; transform: translateY(0); }
+      100% { opacity: 0; transform: translateY(-20px); }
+    }
+
+    /* --- PURE CSS BAR CHART FOR MOCK TESTS --- */
+    .css-chart-container {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      height: 140px;
+      padding-top: 20px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--border-color);
+      position: relative;
+      margin-top: 10px;
+    }
+
+    .chart-pass-line {
+      position: absolute;
+      bottom: calc(40% + 20px);
+      left: 0;
+      width: 100%;
+      border-top: 2px dashed var(--danger-red);
+      z-index: 1;
+    }
+
+    .chart-pass-label {
+      position: absolute;
+      right: 0;
+      bottom: calc(40% + 24px);
+      font-size: 10px;
+      color: var(--danger-red);
+      font-weight: 700;
+    }
+
+    .chart-bar-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex: 1;
+      height: 100%;
+      justify-content: flex-end;
+      z-index: 2;
+    }
+
+    .chart-bar {
+      width: 24px;
+      border-radius: 4px 4px 0 0;
+      transition: height 0.3s ease;
+      min-height: 4px;
+    }
+
+    .chart-bar.pass { background-color: var(--success-green); }
+    .chart-bar.fail { background-color: var(--danger-red); }
+
+    .chart-bar-label {
+      font-size: 10px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    /* --- MODALS & OVERLAYS --- */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(6px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 200;
+      padding: 16px;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .modal-card {
+      background-color: var(--card-bg);
+      border-radius: 16px;
+      border: 1px solid var(--border-color);
+      width: 100%;
+      max-width: 400px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    /* Fullscreen Level Flash */
+    .fullscreen-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 300;
+      animation: flashFade 2.5s ease-in-out forwards;
+      pointer-events: none;
+    }
+
+    .fullscreen-overlay.level-up {
+      background: radial-gradient(circle, rgba(240, 180, 41, 0.95) 0%, rgba(13, 13, 13, 0.95) 80%);
+    }
+
+    .fullscreen-overlay.level-down {
+      background: radial-gradient(circle, rgba(239, 68, 68, 0.95) 0%, rgba(13, 13, 13, 0.95) 80%);
+    }
+
+    .fullscreen-overlay text {
+      font-size: 32px;
+      font-weight: 900;
+      color: #fff;
+      text-shadow: 0 4px 10px rgba(0,0,0,0.5);
+    }
+
+    @keyframes flashFade {
+      0% { opacity: 0; transform: scale(0.8); }
+      20% { opacity: 1; transform: scale(1.05); }
+      80% { opacity: 1; transform: scale(1); }
+      100% { opacity: 0; transform: scale(0.9); }
+    }
+
+    /* TOAST NOTIFICATION */
+    .toast-notification {
+      position: fixed;
+      bottom: 80px;
+      right: 16px;
+      background-color: var(--success-green);
+      color: #fff;
+      padding: 10px 18px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 700;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+      z-index: 250;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: all 0.3s ease;
+      pointer-events: none;
+    }
+
+    .toast-notification.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Mode Selector Toggle */
+    .mode-toggle {
+      display: flex;
+      background-color: var(--surface-color);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 2px;
+      margin-bottom: 8px;
+    }
+
+    .mode-btn {
+      flex: 1;
+      min-height: 36px;
+      border: none;
+      background: none;
+      color: var(--text-muted);
+      font-size: 12px;
+      font-weight: 700;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .mode-btn.active {
+      background-color: var(--accent-gold);
+      color: #000;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="app-container">
+    
+    <!-- FIXED TOP HEADER -->
+    <header class="top-header">
+      <div class="app-title-group">
+        <div class="app-title">CA Command Centre</div>
+        <div id="header-sim-tag" class="header-sim-tag" style="display: none;">SIM</div>
+      </div>
+      <div class="header-level-badge" onclick="openStatsModal()">
+        <span>Level <span id="header-level-num">0</span></span>
+      </div>
+    </header>
+
+    <!-- MAIN CONTENT VIEW CONTAINERS -->
+    <main class="main-content">
+
+      <!-- TAB 1: DASHBOARD -->
+      <section id="tab-dashboard" class="tab-view active">
+        <!-- Student Greeting Card -->
+        <div class="card">
+          <div style="font-size: 13px; color: var(--text-muted);" id="dashboard-date">Today</div>
+          <div style="font-size: 18px; font-weight: 800; margin-top: 2px;" id="dashboard-greeting">Welcome back, Student</div>
+          <div style="font-size: 12px; color: var(--accent-gold); margin-top: 4px; font-weight: 700;" id="dashboard-countdown">⏳ -- days until CA exam</div>
+        </div>
+
+        <!-- Solo Leveling Character Card -->
+        <div class="card character-card" onclick="openStatsModal()">
+          <div class="character-figure-wrap" id="character-figure-container">
+            <!-- Rendered dynamically -->
+          </div>
+          <div style="flex: 1;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span id="rank-title-text" class="badge badge-gold">Rookie Hunter</span>
+              <span style="font-size: 12px; font-weight: 700;" id="streak-display-text">🔥 0 days</span>
+            </div>
+            <div style="font-size: 14px; font-weight: 800; margin-top: 6px;" id="xp-text-progress">0 / 100 XP</div>
+            <div class="progress-bar-container">
+              <div id="xp-bar-fill" class="progress-bar-fill" style="width: 0%;"></div>
+            </div>
+            <div style="font-size: 11px; color: var(--text-muted); text-align: right;" id="xp-needed-text">Need 100 XP for Level 1</div>
+          </div>
+        </div>
+
+        <!-- SRS TODAY'S REVISIONS WIDGET -->
+        <div class="card">
+          <div class="card-title">
+            <span>⚡ Today's Revisions</span>
+            <span id="revisions-count-badge" class="badge badge-amber">0 Due</span>
+          </div>
+          <div id="todays-revisions-list">
+            <!-- Dynamic Revisions List -->
+          </div>
+        </div>
+
+        <!-- Today's Summary & Quick Stats -->
+        <div class="card">
+          <div class="card-title">📊 Today's Progress</div>
+          <div style="display: flex; gap: 12px; margin-bottom: 12px;">
+            <div style="flex: 1; background: var(--surface-color); padding: 10px; border-radius: 8px; text-align: center;">
+              <div style="font-size: 11px; color: var(--text-muted);">Tasks Done</div>
+              <div style="font-size: 16px; font-weight: 800; margin-top: 2px;" id="stat-tasks-done">0 / 0</div>
+            </div>
+            <div style="flex: 1; background: var(--surface-color); padding: 10px; border-radius: 8px; text-align: center;">
+              <div style="font-size: 11px; color: var(--text-muted);">XP Today</div>
+              <div style="font-size: 16px; font-weight: 800; color: var(--accent-gold); margin-top: 2px;" id="stat-xp-today">0 XP</div>
+            </div>
+          </div>
+          <div style="display: flex; gap: 8px;">
+            <button class="btn btn-secondary btn-sm" style="flex: 1;" onclick="switchTab('planner'); openAddTaskSheet();">+ Add Task</button>
+            <button class="btn btn-secondary btn-sm" style="flex: 1;" onclick="switchTab('mocks'); openLogMockModal();">📝 Log Mock</button>
+          </div>
+        </div>
+
+        <!-- Daily Motivational Quote -->
+        <div class="card" style="border-left: 4px solid var(--accent-gold);">
+          <div style="font-size: 13px; font-style: italic; color: #ddd;" id="motivational-quote">"Success is the sum of small efforts, repeated day in and day out."</div>
+        </div>
+      </section>
+
+      <!-- TAB 2: SYLLABUS TRACKER -->
+      <section id="tab-syllabus" class="tab-view">
+        <div class="card">
+          <div class="card-title">
+            <span>📚 Syllabus Completion</span>
+            <span id="syllabus-overall-pct" class="badge badge-gold">0%</span>
+          </div>
+          <div class="progress-bar-container">
+            <div id="syllabus-overall-bar" class="progress-bar-fill" style="width: 0%;"></div>
+          </div>
+          <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;" id="syllabus-stats-summary">0 of 0 chapters completed</div>
+        </div>
+
+        <!-- Papers Accordions -->
+        <div id="syllabus-papers-accordion-container">
+          <!-- Rendered dynamically -->
+        </div>
+      </section>
+
+      <!-- TAB 3: STUDY PLANNER -->
+      <section id="tab-planner" class="tab-view">
+        <!-- Week Strip -->
+        <div class="week-strip" id="planner-week-strip">
+          <!-- Rendered dynamically -->
+        </div>
+
+        <!-- Daily Tasks Header & List -->
+        <div class="card">
+          <div class="card-title">
+            <span id="planner-selected-date-label">Today's Tasks</span>
+            <button class="btn btn-primary btn-sm" onclick="openAddTaskSheet()">+ Add Task</button>
+          </div>
+          <div id="planner-task-list" style="display: flex; flex-direction: column; gap: 8px;">
+            <!-- Rendered dynamically -->
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 4: MOCK TEST ANALYZER -->
+      <section id="tab-mocks" class="tab-view">
+        <!-- Readiness Diagnostic Card -->
+        <div class="card" id="mock-readiness-card">
+          <!-- Diagnostic rendered dynamically -->
+        </div>
+
+        <!-- Log Mock Test Trigger -->
+        <button class="btn btn-primary" style="width: 100%;" onclick="openLogMockModal()">📝 Log New Mock Test</button>
+
+        <!-- Pure CSS Performance Chart -->
+        <div class="card">
+          <div class="card-title">📈 Performance Trend (Last 5 Mocks)</div>
+          <div class="css-chart-container" id="mock-css-chart">
+            <div class="chart-pass-line"></div>
+            <div class="chart-pass-label">40% Pass</div>
+            <!-- Bars rendered dynamically -->
+          </div>
+        </div>
+
+        <!-- Mock Test History List -->
+        <div class="card">
+          <div class="card-title">📜 Mock Test History</div>
+          <div id="mock-history-list" style="display: flex; flex-direction: column; gap: 10px;">
+            <!-- Rendered dynamically -->
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 5: SETTINGS -->
+      <section id="tab-settings" class="tab-view">
+        <!-- Profile & Exam Settings -->
+        <div class="card">
+          <div class="card-title">⚙️ Student Profile</div>
+          <div style="display: flex; flex-direction: column; gap: 10px;">
+            <div>
+              <label style="font-size: 12px; color: var(--text-muted);">Student Name</label>
+              <input type="text" id="setting-user-name" class="input-field" onblur="saveUserSettings()">
+            </div>
+            <div>
+              <label style="font-size: 12px; color: var(--text-muted);">Target Exam Date</label>
+              <input type="date" id="setting-exam-date" class="input-field" onchange="saveUserSettings()">
+            </div>
+          </div>
+        </div>
+
+        <!-- Syllabus Editor -->
+        <div class="card">
+          <div class="card-title">✏️ Syllabus Editor</div>
+          <div id="settings-syllabus-editor-list" style="display: flex; flex-direction: column; gap: 12px;">
+            <!-- Rendered dynamically -->
+          </div>
+          <button class="btn btn-secondary btn-sm" style="margin-top: 10px; width: 100%;" onclick="addNewPaperPrompt()">+ Add New Paper</button>
+        </div>
+
+        <!-- Hidden Date Simulator Tool (for testing SRS & overnight triggers) -->
+        <div class="card" style="border: 1px dashed var(--accent-gold);">
+          <div class="card-title">🧪 Date Simulator (Testing Tool)</div>
+          <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 8px;">Simulate advancing days to test SRS due dates, overdue demotions, and streak resets.</div>
+          <div style="display: flex; gap: 8px;">
+            <input type="date" id="setting-sim-date" class="input-field">
+            <button class="btn btn-secondary btn-sm" onclick="applySimulatedDate()">Apply Date</button>
+            <button class="btn btn-secondary btn-sm" onclick="resetSimulatedDate()">Reset</button>
+          </div>
+        </div>
+
+        <!-- Export, Import, Reset -->
+        <div class="card">
+          <div class="card-title">💾 Backup & Data Management</div>
+          <div style="display: flex; flex-direction: column; gap: 10px;">
+            <button class="btn btn-secondary" onclick="exportDataJSON()">📥 Export Backup (JSON)</button>
+            
+            <div>
+              <label style="font-size: 12px; color: var(--text-muted); display: block; margin-bottom: 4px;">Import Backup</label>
+              <input type="file" id="import-json-file" accept=".json" class="input-field" onchange="handleImportFileSelect(event)">
+            </div>
+
+            <div style="border-top: 1px solid var(--border-color); padding-top: 12px; margin-top: 4px;">
+              <label style="font-size: 12px; color: var(--danger-red); font-weight: 700; display: block; margin-bottom: 4px;">Reset All Data</label>
+              <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 8px;">Type "RESET" to confirm complete wipe:</div>
+              <div style="display: flex; gap: 8px;">
+                <input type="text" id="reset-confirm-input" class="input-field" placeholder="RESET" oninput="validateResetInput()">
+                <button id="reset-data-btn" class="btn btn-danger" disabled onclick="executeDataReset()">Reset</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- FIXED BOTTOM NAVIGATION -->
+    <nav class="bottom-nav">
+      <button class="nav-item active" onclick="switchTab('dashboard')">
+        <span class="nav-icon">🏠</span>
+        <span>Dashboard</span>
+      </button>
+      <button class="nav-item" onclick="switchTab('syllabus')">
+        <span class="nav-icon">📚</span>
+        <span>Syllabus</span>
+      </button>
+      <button class="nav-item" onclick="switchTab('planner')">
+        <span class="nav-icon">📅</span>
+        <span>Planner</span>
+      </button>
+      <button class="nav-item" onclick="switchTab('mocks')">
+        <span class="nav-icon">📝</span>
+        <span>Mocks</span>
+      </button>
+      <button class="nav-item" onclick="switchTab('settings')">
+        <span class="nav-icon">⚙️</span>
+        <span>Settings</span>
+      </button>
+    </nav>
+
+    <!-- MODAL OVERLAYS -->
+
+    <!-- 1. STATS POPUP MODAL -->
+    <div id="stats-modal" class="modal-overlay">
+      <div class="modal-card">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <h3 style="font-size: 18px; color: var(--accent-gold);">⚔️ Hunter Stats</h3>
+          <button class="btn btn-secondary btn-sm" onclick="closeModal('stats-modal')">✕</button>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 8px; font-size: 14px;">
+          <div style="display: flex; justify-content: space-between; padding: 8px; background: var(--surface-color); border-radius: 8px;">
+            <span>Current Level</span><strong id="modal-stat-level">0</strong>
+          </div>
+          <div style="display: flex; justify-content: space-between; padding: 8px; background: var(--surface-color); border-radius: 8px;">
+            <span>Rank Title</span><strong id="modal-stat-rank">Rookie Hunter</strong>
+          </div>
+          <div style="display: flex; justify-content: space-between; padding: 8px; background: var(--surface-color); border-radius: 8px;">
+            <span>Total Lifetime XP</span><strong id="modal-stat-xp">0 XP</strong>
+          </div>
+          <div style="display: flex; justify-content: space-between; padding: 8px; background: var(--surface-color); border-radius: 8px;">
+            <span>Current Streak</span><strong id="modal-stat-streak">0 days</strong>
+          </div>
+          <div style="display: flex; justify-content: space-between; padding: 8px; background: var(--surface-color); border-radius: 8px;">
+            <span>Best Streak</span><strong id="modal-stat-beststreak">0 days</strong>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. CHAPTER EDIT MODAL (RECALCULATE SRS SCHEDULE) -->
+    <div id="chapter-edit-modal" class="modal-overlay">
+      <div class="modal-card">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <h3>Edit Chapter</h3>
+          <button class="btn btn-secondary btn-sm" onclick="closeModal('chapter-edit-modal')">✕</button>
+        </div>
+        <input type="hidden" id="edit-chapter-id">
+        <div>
+          <label style="font-size: 12px; color: var(--text-muted);">Chapter Name</label>
+          <input type="text" id="edit-chapter-name" class="input-field">
+        </div>
+        <div>
+          <label style="font-size: 12px; color: var(--text-muted);">Last Studied Date</label>
+          <input type="date" id="edit-chapter-laststudied" class="input-field">
+          <div style="font-size: 11px; color: var(--accent-gold); margin-top: 4px;">⚠️ Changing last studied date recalculates SRS schedule and future due dates.</div>
+        </div>
+        <div>
+          <label style="font-size: 12px; color: var(--text-muted);">Notes</label>
+          <textarea id="edit-chapter-notes" class="textarea-field" rows="3"></textarea>
+        </div>
+        <button class="btn btn-primary" onclick="saveChapterEditModal()">Save Changes</button>
+      </div>
+    </div>
+
+    <!-- 3. ADD TASK BOTTOM SHEET -->
+    <div id="add-task-sheet" class="modal-overlay">
+      <div class="modal-card">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <h3>+ Add Study Task</h3>
+          <button class="btn btn-secondary btn-sm" onclick="closeModal('add-task-sheet')">✕</button>
+        </div>
+        <div>
+          <label style="font-size: 12px; color: var(--text-muted);">Task Description</label>
+          <input type="text" id="task-input-desc" class="input-field" placeholder="e.g. Read BRS Theory & Q1-Q5">
+        </div>
+        <div>
+          <label style="font-size: 12px; color: var(--text-muted);">Linked Chapter (Optional)</label>
+          <select id="task-input-chapter" class="select-field">
+            <!-- Dynamic dropdown -->
+          </select>
+        </div>
+        <div>
+          <label style="font-size: 12px; color: var(--text-muted);">Estimated Hours</label>
+          <input type="number" id="task-input-hours" class="input-field" value="1" min="0.5" step="0.5">
+        </div>
+        <button class="btn btn-primary" onclick="createNewTask()">Save Task (+20 XP Potential)</button>
+      </div>
+    </div>
+
+    <!-- 4. LOG MOCK TEST MODAL (BULK & QUICK MODE) -->
+    <div id="log-mock-modal" class="modal-overlay">
+      <div class="modal-card">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <h3>📝 Log Mock Test</h3>
+          <button class="btn btn-secondary btn-sm" onclick="closeModal('log-mock-modal')">✕</button>
+        </div>
+        
+        <div class="mode-toggle">
+          <button id="mock-mode-btn-detailed" class="mode-btn active" onclick="setMockMode('detailed')">Detailed Chapter Breakdown</button>
+          <button id="mock-mode-btn-quick" class="mode-btn" onclick="setMockMode('quick')">Quick Overall Score</button>
+        </div>
+
+        <div>
+          <label style="font-size: 12px; color: var(--text-muted);">Test Name / Source</label>
+          <input type="text" id="mock-input-name" class="input-field" placeholder="e.g. ICAI Mock Test Series 1">
+        </div>
+        
+        <div style="display: flex; gap: 8px;">
+          <div style="flex: 1;">
+            <label style="font-size: 12px; color: var(--text-muted);">Paper</label>
+            <select id="mock-input-paper" class="select-field" onchange="renderMockChapterRows()">
+              <!-- Dynamic -->
+            </select>
+          </div>
+          <div style="flex: 1;">
+            <label style="font-size: 12px; color: var(--text-muted);">Date</label>
+            <input type="date" id="mock-input-date" class="input-field">
+          </div>
+        </div>
+
+        <div>
+          <label style="font-size: 12px; color: var(--text-muted);">Time Taken (Optional)</label>
+          <input type="text" id="mock-input-time" class="input-field" placeholder="e.g. 2h 30m">
+        </div>
+
+        <!-- DETAILED CHAPTER-WISE BULK ENTRY ROWS -->
+        <div id="mock-detailed-rows-wrap" style="display: flex; flex-direction: column; gap: 8px; max-height: 250px; overflow-y: auto; padding-right: 4px;">
+          <label style="font-size: 12px; color: var(--accent-gold); font-weight: 700;">Chapter Breakdown (Questions & Correct Answers):</label>
+          <div id="mock-chapter-rows-container" style="display: flex; flex-direction: column; gap: 8px;">
+            <!-- Rendered dynamically -->
+          </div>
+        </div>
+
+        <!-- QUICK MODE OVERALL FIELDS -->
+        <div id="mock-quick-fields-wrap" style="display: none; flex-direction: column; gap: 10px;">
+          <div style="display: flex; gap: 8px;">
+            <div style="flex: 1;">
+              <label style="font-size: 12px; color: var(--text-muted);">Total Marks / Qs</label>
+              <input type="number" id="mock-quick-total" class="input-field" value="100">
+            </div>
+            <div style="flex: 1;">
+              <label style="font-size: 12px; color: var(--text-muted);">Marks Obtained</label>
+              <input type="number" id="mock-quick-obtained" class="input-field" value="0">
+            </div>
+          </div>
+        </div>
+
+        <button class="btn btn-primary" onclick="submitMockTestLog()">Save Mock Test Log</button>
+      </div>
+    </div>
+
+    <!-- 5. IMPORT PREVIEW MODAL -->
+    <div id="import-preview-modal" class="modal-overlay">
+      <div class="modal-card">
+        <h3 style="color: var(--accent-gold);">📦 Import Preview</h3>
+        <div style="font-size: 13px; color: var(--text-muted);">The selected backup file contains:</div>
+        <div style="background: var(--surface-color); padding: 12px; border-radius: 8px; font-size: 13px; display: flex; flex-direction: column; gap: 4px;" id="import-preview-stats">
+          <!-- Dynamic -->
+        </div>
+        <div style="font-size: 12px; color: var(--danger-red); font-weight: 700;">⚠️ Your current local data will be completely replaced.</div>
+        <div style="display: flex; gap: 8px;">
+          <button class="btn btn-secondary" style="flex: 1;" onclick="closeModal('import-preview-modal')">Cancel</button>
+          <button class="btn btn-danger" style="flex: 1;" onclick="confirmExecuteImport()">Yes, Import</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- FULLSCREEN LEVEL UP / DOWN OVERLAYS -->
+    <div id="overlay-level-up" class="fullscreen-overlay level-up">
+      <div style="font-size: 60px;">⚔️</div>
+      <text>LEVEL UP!</text>
+      <div id="overlay-levelup-rank" style="font-size: 18px; color: #fff; margin-top: 8px; font-weight: 700;"></div>
+    </div>
+
+    <div id="overlay-level-down" class="fullscreen-overlay level-down">
+      <div style="font-size: 60px;">💀</div>
+      <text>Level Down</text>
+      <div id="overlay-leveldown-rank" style="font-size: 18px; color: #fff; margin-top: 8px; font-weight: 700;"></div>
+    </div>
+
+    <!-- TOAST NOTIFICATION -->
+    <div id="toast" class="toast-notification">Saved ✓</div>
+
+  </div>
+
+  <script>
+    /* ==========================================================================
+       CA STUDY COMMAND CENTRE — SINGLE FILE APPLICATION LOGIC
+       ========================================================================== */
+
+    // --- HARDCODED DEFAULT SYLLABUS ---
+    const DEFAULT_SYLLABUS = [
+      {
+        paperId: "p1",
+        paperName: "Paper 1 - Accounting",
+        chapters: [
+          "Theoretical Framework",
+          "Accounting Process",
+          "Bank Reconciliation Statement",
+          "Inventories",
+          "Depreciation and Amortisation",
+          "Bills of Exchange and Promissory Notes",
+          "Final Accounts of Sole Proprietors",
+          "Financial Statements of Not-for-Profit Organisations",
+          "Accounts from Incomplete Records",
+          "Partnership and LLP Accounts",
+          "Company Accounts"
+        ].map((name, i) => createDefaultChapterObj("p1", `p1c${i+1}`, name))
+      },
+      {
+        paperId: "p2",
+        paperName: "Paper 2 - Business Laws",
+        chapters: [
+          "Indian Regulatory Framework",
+          "Indian Contract Act 1872",
+          "Sale of Goods Act 1930",
+          "Indian Partnership Act 1932",
+          "LLP Act 2008",
+          "Companies Act 2013",
+          "Negotiable Instruments Act 1881"
+        ].map((name, i) => createDefaultChapterObj("p2", `p2c${i+1}`, name))
+      },
+      {
+        paperId: "p3",
+        paperName: "Paper 3 - Quantitative Aptitude",
+        chapters: [
+          "Ratio, Proportion, Indices, Logarithms",
+          "Equations",
+          "Linear Inequalities",
+          "Mathematics of Finance",
+          "Permutations and Combinations",
+          "Sequence and Series",
+          "Sets, Relations and Functions",
+          "Basics of Calculus",
+          "Statistical Representation of Data",
+          "Central Tendency and Dispersion",
+          "Probability",
+          "Correlation and Regression",
+          "Index Numbers"
+        ].map((name, i) => createDefaultChapterObj("p3", `p3c${i+1}`, name))
+      },
+      {
+        paperId: "p4",
+        paperName: "Paper 4 - Business Economics",
+        chapters: [] // Empty by default
+      }
+    ];
+
+    function createDefaultChapterObj(paperId, id, name) {
+      return {
+        id: id,
+        name: name,
+        status: "Not Started",
+        confidence: 0,
+        lastStudied: null,
+        revisionCount: 0,
+        revisionDates: [],
+        notes: "",
+        intervalLevel: 0,
+        nextRevisionDueDate: null,
+        easyStreak: 0,
+        revisionHistory: [],
+        testAttempts: { correct: 0, total: 0 },
+        accuracy: 0
+      };
+    }
+
+    // CA Motivational Quotes
+    const CA_QUOTES = [
+      '"Success is the sum of small efforts, repeated day in and day out."',
+      '"The future depends on what you do today."',
+      '"CA is not just a degree, it\'s a badge of resilience."',
+      '"Focus on your goal. Don\'t look in any direction but ahead."',
+      '"Don\'t stop until you are proud of your mark sheet."',
+      '"Small daily improvements over time lead to stunning results."',
+      '"Audit your time like you audit financial statements."',
+      '"Doubt kills more dreams than failure ever will."',
+      '"Hard work beats talent when talent doesn\'t work hard."',
+      '"Your speed doesn\'t matter, forward is forward."'
+    ];
+
+    // SRS Intervals in days
+    const SRS_INTERVALS = [1, 3, 7, 21, 30]; // Level 0: +1d, Level 1: +3d, Level 2: +7d, Level 3: +21d, Level 4: +30d Mature
+
+    // --- APPLICATION STATE ---
+    let casc_user = {
+      name: "Student",
+      examDate: getFutureDateStr(90),
+      level: 0,
+      totalXP: 0,
+      streak: 0,
+      bestStreak: 0,
+      lastEvaluatedDate: null,
+      simulatedDate: null
+    };
+
+    let casc_syllabus = [];
+    let casc_tasks = [];
+    let casc_mocks = [];
+    let casc_xp_log = [];
+
+    let currentSelectedPlannerDate = getTodayStr();
+    let currentMockMode = "detailed";
+    let pendingImportData = null;
+    let toastTimer = null;
+
+    // --- INITIALIZATION ---
+    window.addEventListener('DOMContentLoaded', () => {
+      loadAllData();
+      runMidnightEvaluation();
+      renderAll();
+      setupDefaultDates();
+    });
+
+    function getTodayStr() {
+      if (casc_user.simulatedDate) return casc_user.simulatedDate;
+      const d = new Date();
+      return d.toISOString().split('T')[0];
+    }
+
+    function getFutureDateStr(days) {
+      const d = new Date();
+      d.setDate(d.getDate() + days);
+      return d.toISOString().split('T')[0];
+    }
+
+    function formatDateFriendly(dateStr) {
+      if (!dateStr) return 'Never';
+      const parts = dateStr.split('-');
+      return `${parts[2]}/${parts[1]}/${parts[0]}`;
+    }
+
+    function setupDefaultDates() {
+      document.getElementById('mock-input-date').value = getTodayStr();
+      document.getElementById('setting-sim-date').value = getTodayStr();
+    }
+
+    // --- STORAGE MANAGEMENT ---
+    function loadAllData() {
+      try {
+        const u = localStorage.getItem('casc_user');
+        if (u) casc_user = Object.assign(casc_user, JSON.parse(u));
+
+        const s = localStorage.getItem('casc_syllabus');
+        casc_syllabus = s ? JSON.parse(s) : JSON.parse(JSON.stringify(DEFAULT_SYLLABUS));
+
+        const t = localStorage.getItem('casc_tasks');
+        casc_tasks = t ? JSON.parse(t) : [];
+
+        const m = localStorage.getItem('casc_mocks');
+        casc_mocks = m ? JSON.parse(m) : [];
+
+        const x = localStorage.getItem('casc_xp_log');
+        casc_xp_log = x ? JSON.parse(x) : [];
+      } catch (e) {
+        console.error("Error loading data from localStorage", e);
+        casc_syllabus = JSON.parse(JSON.stringify(DEFAULT_SYLLABUS));
+      }
+    }
+
+    function saveData(key) {
+      try {
+        if (key === 'user') localStorage.setItem('casc_user', JSON.stringify(casc_user));
+        if (key === 'syllabus') localStorage.setItem('casc_syllabus', JSON.stringify(casc_syllabus));
+        if (key === 'tasks') localStorage.setItem('casc_tasks', JSON.stringify(casc_tasks));
+        if (key === 'mocks') localStorage.setItem('casc_mocks', JSON.stringify(casc_mocks));
+        if (key === 'xp') localStorage.setItem('casc_xp_log', JSON.stringify(casc_xp_log));
+        if (key === 'all') {
+          localStorage.setItem('casc_user', JSON.stringify(casc_user));
+          localStorage.setItem('casc_syllabus', JSON.stringify(casc_syllabus));
+          localStorage.setItem('casc_tasks', JSON.stringify(casc_tasks));
+          localStorage.setItem('casc_mocks', JSON.stringify(casc_mocks));
+          localStorage.setItem('casc_xp_log', JSON.stringify(casc_xp_log));
+        }
+        showToast("Saved ✓");
+      } catch (e) {
+        console.error("Error saving data", e);
+      }
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.innerText = msg || "Saved ✓";
+      toast.classList.add('show');
+      if (toastTimer) clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => {
+        toast.classList.remove('show');
+      }, 1500);
+    }
+
+    // --- LEVEL & XP MATH ---
+    function getLevelThreshold(L) {
+      if (L <= 0) return 0;
+      if (L === 1) return 100;
+      if (L === 2) return 300; // 100 + 200
+      let total = 300;
+      for (let i = 2; i < L; i++) {
+        total += (i * 200);
+      }
+      return total;
+    }
+
+    function getXPRequiredForNextLevel(currentLevel) {
+      if (currentLevel === 0) return 100;
+      if (currentLevel === 1) return 200;
+      return currentLevel * 200;
+    }
+
+    function calculateLevelFromXP(totalXP) {
+      let L = 0;
+      while (totalXP >= getLevelThreshold(L + 1)) {
+        L++;
+      }
+      return L;
+    }
+
+    function awardXP(amount, actionName) {
+      const oldLevel = casc_user.level;
+      casc_user.totalXP = Math.max(0, casc_user.totalXP + amount);
+      const newLevel = calculateLevelFromXP(casc_user.totalXP);
+      casc_user.level = newLevel;
+
+      casc_xp_log.push({
+        date: getTodayStr(),
+        action: actionName || "Earned XP",
+        xp: amount
+      });
+
+      saveData('user');
+      saveData('xp');
+
+      if (newLevel > oldLevel) {
+        triggerLevelUpOverlay(newLevel);
+      } else if (newLevel < oldLevel) {
+        triggerLevelDownOverlay(newLevel);
+      }
+      renderDashboard();
+    }
+
+    function getRankTitle(level) {
+      if (level === 0) return { title: "Rookie Hunter", class: "stage-0", badgeClass: "badge-gold", icon: "" };
+      if (level <= 2) return { title: "Iron Hunter", class: "stage-1", badgeClass: "badge-blue", icon: "" };
+      if (level <= 5) return { title: "Bronze Hunter", class: "stage-2", badgeClass: "badge-amber", icon: "⚔️" };
+      if (level <= 9) return { title: "Silver Hunter", class: "stage-3", badgeClass: "badge-gold", icon: "🛡️" };
+      if (level <= 14) return { title: "Gold Hunter", class: "stage-4", badgeClass: "badge-gold", icon: "✨" };
+      if (level <= 19) return { title: "Platinum Hunter", class: "stage-5", badgeClass: "badge-gold", icon: "🪽" };
+      if (level <= 24) return { title: "Diamond Hunter", class: "stage-6", badgeClass: "badge-blue", icon: "💎" };
+      if (level <= 29) return { title: "Shadow Monarch Initiate", class: "stage-7", badgeClass: "badge-gold", icon: "👁️" };
+      return { title: "Shadow Monarch", class: "stage-8", badgeClass: "badge-gold", icon: "👑" };
+    }
+
+    // --- MIDNIGHT EVALUATION ALGORITHM ---
+    function runMidnightEvaluation() {
+      const todayStr = getTodayStr();
+      let lastEval = casc_user.lastEvaluatedDate;
+
+      if (!lastEval) {
+        casc_user.lastEvaluatedDate = todayStr;
+        saveData('user');
+        return;
+      }
+
+      if (lastEval === todayStr) {
+        checkOverdueSRSAutoDemotion();
+        return;
+      }
+
+      // Loop through past dates
+      let curr = new Date(lastEval);
+      const todayDateObj = new Date(todayStr);
+
+      while (curr < todayDateObj) {
+        curr.setDate(curr.getDate() + 1);
+        const evalDateStr = curr.toISOString().split('T')[0];
+
+        if (evalDateStr > todayStr) break;
+
+        const dateTasks = casc_tasks.filter(t => t.date === evalDateStr);
+        if (dateTasks.length > 0) {
+          const doneCount = dateTasks.filter(t => t.done).length;
+          const totalCount = dateTasks.length;
+
+          if (doneCount === totalCount) {
+            casc_user.streak += 1;
+            if (casc_user.streak > casc_user.bestStreak) {
+              casc_user.bestStreak = casc_user.streak;
+            }
+          } else if (doneCount > 0) {
+            casc_user.streak = 0; // Partial completion = streak break, no XP deduction
+          } else {
+            casc_user.streak = 0; // Zero completion = soft penalty -10 XP
+            awardXP(-10, `Skipped day penalty (${evalDateStr})`);
+          }
+
+          // Mark incomplete tasks as missed
+          dateTasks.forEach(t => {
+            if (!t.done) t.missed = true;
+          });
+        }
+      }
+
+      casc_user.lastEvaluatedDate = todayStr;
+      checkOverdueSRSAutoDemotion();
+      saveData('user');
+      saveData('tasks');
+    }
+
+    function checkOverdueSRSAutoDemotion() {
+      const todayStr = getTodayStr();
+      const todayTime = new Date(todayStr).getTime();
+
+      casc_syllabus.forEach(paper => {
+        paper.chapters.forEach(chap => {
+          if (chap.nextRevisionDueDate) {
+            const dueTime = new Date(chap.nextRevisionDueDate).getTime();
+            const diffDays = Math.floor((todayTime - dueTime) / (1000 * 60 * 60 * 24));
+            if (diffDays > 7 && chap.intervalLevel > 0) {
+              chap.intervalLevel = Math.max(0, chap.intervalLevel - 1);
+              chap.easyStreak = 0;
+            }
+          }
+        });
+      });
+      saveData('syllabus');
+    }
+
+    // --- TAB NAVIGATION ---
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-view').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+
+      const targetView = document.getElementById(`tab-${tabId}`);
+      if (targetView) targetView.classList.add('active');
+
+      const navBtns = document.querySelectorAll('.nav-item');
+      const tabMap = { dashboard: 0, syllabus: 1, planner: 2, mocks: 3, settings: 4 };
+      if (navBtns[tabMap[tabId]]) navBtns[tabMap[tabId]].classList.add('active');
+
+      if (tabId === 'dashboard') runMidnightEvaluation();
+      renderAll();
+    }
+
+    function renderAll() {
+      renderHeader();
+      renderDashboard();
+      renderSyllabus();
+      renderPlanner();
+      renderMocks();
+      renderSettings();
+    }
+
+    // --- HEADER RENDER ---
+    function renderHeader() {
+      document.getElementById('header-level-num').innerText = casc_user.level;
+      const simTag = document.getElementById('header-sim-tag');
+      if (casc_user.simulatedDate) {
+        simTag.style.display = 'inline-block';
+        simTag.innerText = `SIM: ${formatDateFriendly(casc_user.simulatedDate)}`;
+      } else {
+        simTag.style.display = 'none';
+      }
+    }
+
+    // --- DASHBOARD RENDER ---
+    function renderDashboard() {
+      const todayStr = getTodayStr();
+      document.getElementById('dashboard-date').innerText = formatDateFriendly(todayStr);
+      document.getElementById('dashboard-greeting').innerText = `Welcome back, ${casc_user.name}`;
+
+      // Exam countdown
+      if (casc_user.examDate) {
+        const diffTime = new Date(casc_user.examDate) - new Date(todayStr);
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        document.getElementById('dashboard-countdown').innerText = `⏳ ${diffDays > 0 ? diffDays : 0} days until CA exam`;
+      }
+
+      // Character Visual Rendering
+      const rankInfo = getRankTitle(casc_user.level);
+      const charWrap = document.getElementById('character-figure-container');
+      charWrap.className = `character-figure-wrap ${rankInfo.class}`;
+      charWrap.innerHTML = `
+        <div class="char-aura"></div>
+        <div class="character-figure">
+          <div class="char-head"></div>
+          <div class="char-body"></div>
+        </div>
+        ${rankInfo.icon ? `<div class="char-badge-icon">${rankInfo.icon}</div>` : ''}
+      `;
+
+      document.getElementById('rank-title-text').innerText = rankInfo.title;
+      document.getElementById('rank-title-text').className = `badge ${rankInfo.badgeClass}`;
+
+      // Streak
+      const fireHtml = casc_user.streak >= 3 ? `<span class="pulsing-fire">🔥</span>` : `🔥`;
+      document.getElementById('streak-display-text').innerHTML = `${fireHtml} ${casc_user.streak} day streak`;
+
+      // XP Bar
+      const currentLevelBaseXP = getLevelThreshold(casc_user.level);
+      const nextLevelThreshold = getLevelThreshold(casc_user.level + 1);
+      const xpIntoCurrent = casc_user.totalXP - currentLevelBaseXP;
+      const xpNeeded = nextLevelThreshold - currentLevelBaseXP;
+      const pct = Math.min(100, Math.max(0, Math.floor((xpIntoCurrent / xpNeeded) * 100)));
+
+      document.getElementById('xp-text-progress').innerText = `${xpIntoCurrent} / ${xpNeeded} XP`;
+      document.getElementById('xp-bar-fill').style.width = `${pct}%`;
+      document.getElementById('xp-needed-text').innerText = `Need ${xpNeeded - xpIntoCurrent} more XP for Level ${casc_user.level + 1}`;
+
+      // SRS Revisions Widget
+      renderSRSWidget();
+
+      // Today's Summary & Stats
+      const todayTasks = casc_tasks.filter(t => t.date === todayStr);
+      const doneCount = todayTasks.filter(t => t.done).length;
+      document.getElementById('stat-tasks-done').innerText = `${doneCount} / ${todayTasks.length}`;
+
+      const xpEarnedToday = casc_xp_log.filter(x => x.date === todayStr && x.xp > 0).reduce((acc, curr) => acc + curr.xp, 0);
+      document.getElementById('stat-xp-today').innerText = `${xpEarnedToday} XP`;
+
+      // Quote Rotation
+      const quoteIndex = Math.abs(todayStr.split('-').join('') % CA_QUOTES.length);
+      document.getElementById('motivational-quote').innerText = CA_QUOTES[quoteIndex];
+    }
+
+    // SRS REVISIONS WIDGET RENDER
+    function renderSRSWidget() {
+      const listEl = document.getElementById('todays-revisions-list');
+      const badgeEl = document.getElementById('revisions-count-badge');
+      const todayStr = getTodayStr();
+
+      let dueChapters = [];
+      let overdueChapters = [];
+
+      casc_syllabus.forEach(paper => {
+        paper.chapters.forEach(chap => {
+          if (chap.nextRevisionDueDate) {
+            if (chap.nextRevisionDueDate < todayStr) {
+              overdueChapters.push({ paperName: paper.paperName, chap: chap });
+            } else if (chap.nextRevisionDueDate === todayStr) {
+              dueChapters.push({ paperName: paper.paperName, chap: chap });
+            }
+          }
+        });
+      });
+
+      const totalDue = overdueChapters.length + dueChapters.length;
+      badgeEl.innerText = `${totalDue} Due`;
+
+      if (totalDue === 0) {
+        listEl.innerHTML = `
+          <div style="text-align: center; padding: 20px; color: var(--text-muted);">
+            <div style="font-size: 32px;">🎉</div>
+            <div style="font-weight: 700; color: var(--accent-gold); margin-top: 4px;">All Clear!</div>
+            <div style="font-size: 12px;">No revisions due today. Keep studying!</div>
+          </div>
+        `;
+        return;
+      }
+
+      let html = '';
+
+      // Overdue first (Red)
+      overdueChapters.forEach(item => {
+        const c = item.chap;
+        const diffDays = Math.floor((new Date(todayStr) - new Date(c.nextRevisionDueDate)) / (1000 * 60 * 60 * 24));
+        html += `
+          <div class="revision-item overdue">
+            <div class="revision-header">
+              <div>
+                <div style="font-weight: 700; font-size: 14px;">${c.name}</div>
+                <div style="font-size: 11px; color: var(--text-muted);">${item.paperName}</div>
+              </div>
+              <span class="badge badge-red">⚠️ Overdue ${diffDays}d</span>
+            </div>
+            <div style="font-size: 11px; color: #f87171;">Interval: +${SRS_INTERVALS[c.intervalLevel]}d (Level ${c.intervalLevel})</div>
+            <div class="revision-actions">
+              <button class="btn btn-sm btn-srs-hard" onclick="processSRSRevision('${c.id}', 'Hard')">Hard</button>
+              <button class="btn btn-sm btn-srs-ok" onclick="processSRSRevision('${c.id}', 'OK')">OK</button>
+              <button class="btn btn-sm btn-srs-easy" onclick="processSRSRevision('${c.id}', 'Easy')">Easy</button>
+            </div>
+          </div>
+        `;
+      });
+
+      // Today's Due
+      dueChapters.forEach(item => {
+        const c = item.chap;
+        html += `
+          <div class="revision-item">
+            <div class="revision-header">
+              <div>
+                <div style="font-weight: 700; font-size: 14px;">${c.name}</div>
+                <div style="font-size: 11px; color: var(--text-muted);">${item.paperName}</div>
+              </div>
+              <span class="badge badge-amber">⚡ Due Today</span>
+            </div>
+            <div style="font-size: 11px; color: var(--accent-gold);">Interval: +${SRS_INTERVALS[c.intervalLevel]}d (Level ${c.intervalLevel})</div>
+            <div class="revision-actions">
+              <button class="btn btn-sm btn-srs-hard" onclick="processSRSRevision('${c.id}', 'Hard')">Hard</button>
+              <button class="btn btn-sm btn-srs-ok" onclick="processSRSRevision('${c.id}', 'OK')">OK</button>
+              <button class="btn btn-sm btn-srs-easy" onclick="processSRSRevision('${c.id}', 'Easy')">Easy</button>
+            </div>
+          </div>
+        `;
+      });
+
+      listEl.innerHTML = html;
+    }
+
+    // PROCESS SRS RATING BUTTON CLICK
+    function processSRSRevision(chapId, rating) {
+      const todayStr = getTodayStr();
+      let targetChap = null;
+
+      casc_syllabus.forEach(paper => {
+        paper.chapters.forEach(c => {
+          if (c.id === chapId) targetChap = c;
+        });
+      });
+
+      if (!targetChap) return;
+
+      const oldLevel = targetChap.intervalLevel;
+      let newLevel = oldLevel;
+
+      if (rating === 'Hard') {
+        newLevel = oldLevel;
+        targetChap.easyStreak = 0;
+      } else if (rating === 'OK') {
+        newLevel = Math.min(4, oldLevel + 1);
+        targetChap.easyStreak = 0;
+      } else if (rating === 'Easy') {
+        targetChap.easyStreak = (targetChap.easyStreak || 0) + 1;
+        if (targetChap.easyStreak >= 2) {
+          newLevel = Math.min(4, oldLevel + 2); // Skip one interval ahead!
+        } else {
+          newLevel = Math.min(4, oldLevel + 1);
+        }
+      }
+
+      targetChap.intervalLevel = newLevel;
+      targetChap.lastStudied = todayStr;
+      targetChap.revisionCount = (targetChap.revisionCount || 0) + 1;
+      
+      if (!targetChap.revisionDates) targetChap.revisionDates = [];
+      targetChap.revisionDates.push(todayStr);
+
+      // Calculate next due date from TODAY
+      const nextDays = SRS_INTERVALS[newLevel];
+      const nextD = new Date(todayStr);
+      nextD.setDate(nextD.getDate() + nextDays);
+      targetChap.nextRevisionDueDate = nextD.toISOString().split('T')[0];
+
+      if (targetChap.status === 'Not Started') targetChap.status = 'In Progress';
+
+      saveData('syllabus');
+      awardXP(20, `Revised: ${targetChap.name}`);
+      showToast("Revision Saved (+20 XP) ✓");
+      renderAll();
+    }
+
+    // --- SYLLABUS TAB RENDER ---
+    function renderSyllabus() {
+      let totalChaps = 0;
+      let doneChaps = 0;
+
+      casc_syllabus.forEach(p => {
+        totalChaps += p.chapters.length;
+        doneChaps += p.chapters.filter(c => c.status === 'Done').length;
+      });
+
+      const overallPct = totalChaps > 0 ? Math.floor((doneChaps / totalChaps) * 100) : 0;
+      document.getElementById('syllabus-overall-pct').innerText = `${overallPct}%`;
+      document.getElementById('syllabus-overall-bar').style.width = `${overallPct}%`;
+      document.getElementById('syllabus-stats-summary').innerText = `${doneChaps} of ${totalChaps} chapters marked Done`;
+
+      const accordionContainer = document.getElementById('syllabus-papers-accordion-container');
+      const todayStr = getTodayStr();
+
+      accordionContainer.innerHTML = casc_syllabus.map((paper, pIdx) => {
+        const pDone = paper.chapters.filter(c => c.status === 'Done').length;
+        const pPct = paper.chapters.length > 0 ? Math.floor((pDone / paper.chapters.length) * 100) : 0;
+
+        const chaptersHtml = paper.chapters.length === 0 ? `
+          <div style="text-align: center; padding: 16px; color: var(--text-muted);">
+            <div>No chapters added yet.</div>
+            <button class="btn btn-secondary btn-sm" style="margin-top: 8px;" onclick="promptAddChapter('${paper.paperId}')">+ Add Chapter</button>
+          </div>
+        ` : paper.chapters.map(chap => {
+          let badgeHtml = '';
+          if (chap.nextRevisionDueDate) {
+            if (chap.nextRevisionDueDate < todayStr) {
+              const diff = Math.floor((new Date(todayStr) - new Date(chap.nextRevisionDueDate)) / (1000 * 60 * 60 * 24));
+              badgeHtml = `<span class="badge badge-red">⚠️ Overdue ${diff}d</span>`;
+            } else if (chap.nextRevisionDueDate === todayStr) {
+              badgeHtml = `<span class="badge badge-amber">⚡ Due Today</span>`;
+            }
+          }
+
+          let pillClass = 'badge-red';
+          if (chap.status === 'In Progress') pillClass = 'badge-amber';
+          if (chap.status === 'Done') pillClass = 'badge-green';
+
+          const accuracyText = chap.testAttempts && chap.testAttempts.total > 0 ? 
+            `${Math.round((chap.testAttempts.correct / chap.testAttempts.total) * 100)}% acc` : '';
+
+          return `
+            <div class="chapter-tile">
+              <div class="chapter-header">
+                <div>
+                  <div style="font-weight: 700; font-size: 14px; cursor: pointer;" onclick="openChapterEditModal('${chap.id}')">${chap.name} ✏️</div>
+                  <div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">
+                    Last studied: ${formatDateFriendly(chap.lastStudied)} | Revisions: ${chap.revisionCount || 0}
+                    ${accuracyText ? ` | <span style="color: var(--accent-gold); font-weight: 700;">${accuracyText}</span>` : ''}
+                  </div>
+                </div>
+                <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px;">
+                  <span class="badge status-pill ${pillClass}" onclick="cycleChapterStatus('${chap.id}')">${chap.status}</span>
+                  ${badgeHtml}
+                </div>
+              </div>
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 4px;">
+                <div class="star-rating">
+                  ${[1, 2, 3, 4, 5].map(star => `
+                    <span class="star ${star <= chap.confidence ? `active-${chap.confidence}` : ''}" onclick="setChapterConfidence('${chap.id}', ${star})">★</span>
+                  `).join('')}
+                </div>
+                <button class="btn btn-secondary btn-sm" onclick="openChapterEditModal('${chap.id}')">Edit / Notes</button>
+              </div>
+            </div>
+          `;
+        }).join('');
+
+        return `
+          <div class="paper-accordion ${pIdx === 0 ? 'open' : ''}" id="accordion-${paper.paperId}">
+            <div class="paper-header" onclick="toggleAccordion('accordion-${paper.paperId}')">
+              <span>${paper.paperName}</span>
+              <span class="badge badge-gold">${pPct}%</span>
+            </div>
+            <div class="paper-content">
+              ${chaptersHtml}
+              ${paper.chapters.length > 0 ? `<button class="btn btn-secondary btn-sm" onclick="promptAddChapter('${paper.paperId}')">+ Add Chapter</button>` : ''}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function toggleAccordion(id) {
+      document.getElementById(id).classList.toggle('open');
+    }
+
+    function cycleChapterStatus(chapId) {
+      casc_syllabus.forEach(paper => {
+        paper.chapters.forEach(chap => {
+          if (chap.id === chapId) {
+            if (chap.status === 'Not Started') chap.status = 'In Progress';
+            else if (chap.status === 'In Progress') chap.status = 'Done';
+            else chap.status = 'Not Started';
+          }
+        });
+      });
+      saveData('syllabus');
+      renderSyllabus();
+    }
+
+    function setChapterConfidence(chapId, rating) {
+      casc_syllabus.forEach(paper => {
+        paper.chapters.forEach(chap => {
+          if (chap.id === chapId) chap.confidence = rating;
+        });
+      });
+      saveData('syllabus');
+      renderSyllabus();
+    }
+
+    // CHAPTER EDIT MODAL & RECALCULATE SCHEDULE
+    function openChapterEditModal(chapId) {
+      let target = null;
+      casc_syllabus.forEach(paper => {
+        paper.chapters.forEach(chap => {
+          if (chap.id === chapId) target = chap;
+        });
+      });
+
+      if (!target) return;
+
+      document.getElementById('edit-chapter-id').value = target.id;
+      document.getElementById('edit-chapter-name').value = target.name;
+      document.getElementById('edit-chapter-laststudied').value = target.lastStudied || getTodayStr();
+      document.getElementById('edit-chapter-notes').value = target.notes || '';
+
+      document.getElementById('chapter-edit-modal').classList.add('active');
+    }
+
+    function saveChapterEditModal() {
+      const chapId = document.getElementById('edit-chapter-id').value;
+      const newName = document.getElementById('edit-chapter-name').value.trim();
+      const newLastStudied = document.getElementById('edit-chapter-laststudied').value;
+      const newNotes = document.getElementById('edit-chapter-notes').value.trim();
+
+      let target = null;
+      casc_syllabus.forEach(paper => {
+        paper.chapters.forEach(chap => {
+          if (chap.id === chapId) target = chap;
+        });
+      });
+
+      if (!target) return;
+
+      target.name = newName;
+      target.notes = newNotes;
+
+      if (newLastStudied && newLastStudied !== target.lastStudied) {
+        target.lastStudied = newLastStudied;
+        target.easyStreak = 0;
+        const nextDays = SRS_INTERVALS[target.intervalLevel || 0];
+        const nextD = new Date(newLastStudied);
+        nextD.setDate(nextD.getDate() + nextDays);
+        target.nextRevisionDueDate = nextD.toISOString().split('T')[0];
+        showToast("Schedule recalculated.");
+      } else {
+        showToast("Saved ✓");
+      }
+
+      saveData('syllabus');
+      closeModal('chapter-edit-modal');
+      renderAll();
+    }
+
+    // --- PLANNER TAB RENDER ---
+    function renderPlanner() {
+      // Render Week Strip
+      const weekStripEl = document.getElementById('planner-week-strip');
+      const todayStr = getTodayStr();
+      const todayObj = new Date(todayStr);
+
+      const daysOfWeek = [];
+      const currentDayIdx = todayObj.getDay(); // 0 is Sun
+      const distanceToMon = currentDayIdx === 0 ? -6 : 1 - currentDayIdx;
+
+      const mondayObj = new Date(todayObj);
+      mondayObj.setDate(todayObj.getDate() + distanceToMon);
+
+      for (let i = 0; i < 7; i++) {
+        const d = new Date(mondayObj);
+        d.setDate(mondayObj.getDate() + i);
+        const dateStr = d.toISOString().split('T')[0];
+        const dayName = d.toLocaleDateString('en-US', { weekday: 'short' });
+        daysOfWeek.push({ name: dayName, date: dateStr });
+      }
+
+      weekStripEl.innerHTML = daysOfWeek.map(item => {
+        const dayTasks = casc_tasks.filter(t => t.date === item.date);
+        let icon = '';
+        if (dayTasks.length > 0) {
+          const done = dayTasks.filter(t => t.done).length;
+          if (done === dayTasks.length) icon = '✅';
+          else if (done > 0) icon = '⚠️';
+          else icon = '❌';
+        }
+
+        const isActive = item.date === currentSelectedPlannerDate;
+        return `
+          <div class="day-pill ${isActive ? 'active' : ''}" onclick="selectPlannerDate('${item.date}')">
+            <span>${item.name}</span>
+            <span style="font-size: 10px;">${item.date.split('-')[2]}</span>
+            <span>${icon}</span>
+          </div>
+        `;
+      }).join('');
+
+      // Render Tasks
+      document.getElementById('planner-selected-date-label').innerText = 
+        currentSelectedPlannerDate === todayStr ? "Today's Tasks" : `Tasks for ${formatDateFriendly(currentSelectedPlannerDate)}`;
+
+      const selectedTasks = casc_tasks.filter(t => t.date === currentSelectedPlannerDate);
+      const taskListEl = document.getElementById('planner-task-list');
+
+      if (selectedTasks.length === 0) {
+        taskListEl.innerHTML = `
+          <div style="text-align: center; padding: 20px; color: var(--text-muted);">
+            <div>No tasks scheduled for this day.</div>
+            <button class="btn btn-secondary btn-sm" style="margin-top: 8px;" onclick="openAddTaskSheet()">+ Add Task</button>
+          </div>
+        `;
+        return;
+      }
+
+      taskListEl.innerHTML = selectedTasks.map(t => {
+        let rowClass = t.done ? 'done' : (t.missed ? 'missed' : '');
+        return `
+          <div class="task-row ${rowClass}">
+            <div class="task-checkbox ${t.done ? 'checked' : ''}" onclick="toggleTaskDone('${t.id}', event)">
+              ${t.done ? '✓' : ''}
+            </div>
+            <div style="flex: 1;">
+              <div style="font-weight: 700; font-size: 14px; ${t.done ? 'text-decoration: line-through; color: var(--text-muted);' : ''}">${t.description}</div>
+              <div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">
+                Est: ${t.estimatedHours}h
+                ${t.missed && !t.done ? `<span class="badge badge-red" style="margin-left: 6px;">Missed</span>` : ''}
+              </div>
+            </div>
+            <span class="badge badge-gold">+20 XP</span>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function selectPlannerDate(dateStr) {
+      currentSelectedPlannerDate = dateStr;
+      renderPlanner();
+    }
+
+    function toggleTaskDone(taskId, event) {
+      const task = casc_tasks.find(t => t.id === taskId);
+      if (!task) return;
+
+      task.done = !task.done;
+
+      if (task.done && !task.xpAwarded) {
+        task.xpAwarded = true;
+        awardXP(20, `Task: ${task.description}`);
+
+        // Floating +20 XP animation
+        if (event && event.currentTarget) {
+          const floatEl = document.createElement('div');
+          floatEl.className = 'floating-xp';
+          floatEl.innerText = '+20 XP';
+          event.currentTarget.parentElement.appendChild(floatEl);
+          setTimeout(() => floatEl.remove(), 1000);
+        }
+      }
+
+      saveData('tasks');
+      renderPlanner();
+      renderDashboard();
+    }
+
+    function openAddTaskSheet() {
+      // Populate chapter dropdown
+      const selectEl = document.getElementById('task-input-chapter');
+      let options = `<option value="">None (General Task)</option>`;
+      casc_syllabus.forEach(p => {
+        options += `<optgroup label="${p.paperName}">`;
+        p.chapters.forEach(c => {
+          options += `<option value="${c.id}">${c.name}</option>`;
+        });
+        options += `</optgroup>`;
+      });
+      selectEl.innerHTML = options;
+
+      document.getElementById('task-input-desc').value = '';
+      document.getElementById('add-task-sheet').classList.add('active');
+    }
+
+    function createNewTask() {
+      const desc = document.getElementById('task-input-desc').value.trim();
+      const chapId = document.getElementById('task-input-chapter').value;
+      const hours = parseFloat(document.getElementById('task-input-hours').value) || 1;
+
+      if (!desc) {
+        alert("Please enter a task description.");
+        return;
+      }
+
+      casc_tasks.push({
+        id: `task_${Date.now()}`,
+        date: currentSelectedPlannerDate,
+        description: desc,
+        chapterId: chapId || null,
+        estimatedHours: hours,
+        done: false,
+        missed: false,
+        xpAwarded: false
+      });
+
+      saveData('tasks');
+      closeModal('add-task-sheet');
+      renderPlanner();
+      renderDashboard();
+    }
+
+    // --- MOCK TEST ANALYZER RENDER ---
+    function renderMocks() {
+      renderMockReadiness();
+      renderMockChart();
+      renderMockHistory();
+    }
+
+    function renderMockReadiness() {
+      const cardEl = document.getElementById('mock-readiness-card');
+      let totalChaps = 0;
+      let confidentChaps = 0;
+      let weakChaps = [];
+
+      casc_syllabus.forEach(p => {
+        p.chapters.forEach(c => {
+          totalChaps++;
+          if (c.confidence >= 3) confidentChaps++;
+          if (c.confidence < 3 || (c.testAttempts && c.testAttempts.total > 0 && (c.testAttempts.correct / c.testAttempts.total) < 0.4)) {
+            weakChaps.push(c.name);
+          }
+        });
+      });
+
+      const readinessScore = totalChaps > 0 ? Math.floor((confidentChaps / totalChaps) * 100) : 0;
+      const isReady = weakChaps.length <= 3 && readinessScore >= 60;
+
+      cardEl.innerHTML = `
+        <div class="card-title">
+          <span>🧠 Mock Exam Diagnostic</span>
+          <span class="badge ${isReady ? 'badge-green' : 'badge-red'}">${isReady ? 'READY 🚀' : 'HOLD BACK 🛑'}</span>
+        </div>
+        <div style="font-size: 14px; font-weight: 800; color: ${isReady ? 'var(--success-green)' : 'var(--danger-red)'}; margin-bottom: 4px;">
+          ${isReady ? 'READY FOR NEXT MOCK 🚀' : 'HOLD BACK 🛑 (Focus on weak chapters)'}
+        </div>
+        <div style="font-size: 12px; color: var(--text-muted);">
+          Confidence Index: ${readinessScore}% (${confidentChaps}/${totalChaps} confident)
+        </div>
+        ${weakChaps.length > 0 ? `
+          <div style="margin-top: 8px; font-size: 11px; color: #f87171;">
+            <strong>Weak / High-Risk Chapters (${weakChaps.length}):</strong> ${weakChaps.slice(0, 4).join(', ')}${weakChaps.length > 4 ? '...' : ''}
+          </div>
+        ` : ''}
+      `;
+    }
+
+    function renderMockChart() {
+      const container = document.getElementById('mock-css-chart');
+      const recentMocks = casc_mocks.slice(-5);
+
+      let barsHtml = `<div class="chart-pass-line"></div><div class="chart-pass-label">40% Pass</div>`;
+
+      if (recentMocks.length === 0) {
+        barsHtml += `<div style="width: 100%; text-align: center; color: var(--text-muted); font-size: 12px; padding-top: 40px;">No mock tests logged yet.</div>`;
+      } else {
+        recentMocks.forEach((m, idx) => {
+          const pct = Math.min(100, Math.max(0, m.percentage || 0));
+          const isPass = pct >= 40;
+          barsHtml += `
+            <div class="chart-bar-wrap">
+              <div style="font-size: 10px; font-weight: 700; color: ${isPass ? 'var(--success-green)' : 'var(--danger-red)'}; margin-bottom: 2px;">${pct}%</div>
+              <div class="chart-bar ${isPass ? 'pass' : 'fail'}" style="height: ${pct}%;"></div>
+              <div class="chart-bar-label">M${idx + 1}</div>
+            </div>
+          `;
+        });
+      }
+
+      container.innerHTML = barsHtml;
+    }
+
+    function renderMockHistory() {
+      const container = document.getElementById('mock-history-list');
+      if (casc_mocks.length === 0) {
+        container.innerHTML = `<div style="text-align: center; padding: 16px; color: var(--text-muted); font-size: 12px;">No mock test records found.</div>`;
+        return;
+      }
+
+      const reversed = [...casc_mocks].reverse();
+      container.innerHTML = reversed.map(m => {
+        const isPass = m.percentage >= 40;
+        return `
+          <div class="card" style="padding: 12px; background: var(--surface-color);">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+              <div>
+                <div style="font-weight: 700; font-size: 14px;">${m.testName || 'Mock Test'}</div>
+                <div style="font-size: 11px; color: var(--text-muted);">${m.paperName} | ${formatDateFriendly(m.date)}</div>
+              </div>
+              <span class="badge ${isPass ? 'badge-green' : 'badge-red'}">${isPass ? 'PASS' : 'FAIL'} (${m.percentage}%)</span>
+            </div>
+            <div style="font-size: 12px; margin-top: 6px; color: #ddd;">
+              Score: <strong>${m.marksObtained} / ${m.totalMarks}</strong> ${m.timeTaken ? `| Time: ${m.timeTaken}` : ''}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function openLogMockModal() {
+      const paperSelect = document.getElementById('mock-input-paper');
+      paperSelect.innerHTML = `
+        ${casc_syllabus.map(p => `<option value="${p.paperName}">${p.paperName}</option>`).join('')}
+        <option value="Full Test">Full Test (All Papers)</option>
+      `;
+
+      document.getElementById('mock-input-name').value = '';
+      document.getElementById('mock-input-time').value = '';
+      renderMockChapterRows();
+
+      document.getElementById('log-mock-modal').classList.add('active');
+    }
+
+    function setMockMode(mode) {
+      currentMockMode = mode;
+      document.getElementById('mock-mode-btn-detailed').className = `mode-btn ${mode === 'detailed' ? 'active' : ''}`;
+      document.getElementById('mock-mode-btn-quick').className = `mode-btn ${mode === 'quick' ? 'active' : ''}`;
+
+      document.getElementById('mock-detailed-rows-wrap').style.display = mode === 'detailed' ? 'flex' : 'none';
+      document.getElementById('mock-quick-fields-wrap').style.display = mode === 'quick' ? 'flex' : 'none';
+    }
+
+    function renderMockChapterRows() {
+      const paperName = document.getElementById('mock-input-paper').value;
+      const container = document.getElementById('mock-chapter-rows-container');
+
+      let targetChapters = [];
+      if (paperName === 'Full Test') {
+        casc_syllabus.forEach(p => targetChapters.push(...p.chapters));
+      } else {
+        const p = casc_syllabus.find(p => p.paperName === paperName);
+        if (p) targetChapters = p.chapters;
+      }
+
+      if (targetChapters.length === 0) {
+        container.innerHTML = `<div style="font-size: 12px; color: var(--text-muted);">No chapters found for selected paper. Add chapters in Settings.</div>`;
+        return;
+      }
+
+      container.innerHTML = targetChapters.map(c => `
+        <div style="background: var(--surface-color); padding: 8px 10px; border-radius: 8px; display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+          <div style="font-size: 12px; font-weight: 700; flex: 1;">${c.name}</div>
+          <div style="display: flex; gap: 6px; width: 140px;">
+            <input type="number" class="input-field mock-row-total" data-chapid="${c.id}" placeholder="Qs" min="0" style="padding: 4px; min-height: 32px; font-size: 12px; text-align: center;">
+            <input type="number" class="input-field mock-row-correct" data-chapid="${c.id}" placeholder="Correct" min="0" style="padding: 4px; min-height: 32px; font-size: 12px; text-align: center;">
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function submitMockTestLog() {
+      const name = document.getElementById('mock-input-name').value.trim() || "Mock Test";
+      const paperName = document.getElementById('mock-input-paper').value;
+      const dateStr = document.getElementById('mock-input-date').value || getTodayStr();
+      const timeTaken = document.getElementById('mock-input-time').value.trim();
+
+      let marksObtained = 0;
+      let totalMarks = 0;
+      let chapterBreakdown = [];
+
+      if (currentMockMode === 'detailed') {
+        const rowTotals = document.querySelectorAll('.mock-row-total');
+        const rowCorrects = document.querySelectorAll('.mock-row-correct');
+
+        rowTotals.forEach((totEl, idx) => {
+          const tot = parseInt(totEl.value) || 0;
+          const corr = parseInt(rowCorrects[idx].value) || 0;
+          const chapId = totEl.getAttribute('data-chapid');
+
+          if (tot > 0) {
+            totalMarks += tot;
+            marksObtained += Math.min(tot, corr);
+            chapterBreakdown.push({ chapterId: chapId, total: tot, correct: Math.min(tot, corr) });
+
+            // Push into single source of truth chapter record
+            casc_syllabus.forEach(paper => {
+              paper.chapters.forEach(c => {
+                if (c.id === chapId) {
+                  if (!c.testAttempts) c.testAttempts = { correct: 0, total: 0 };
+                  c.testAttempts.total += tot;
+                  c.testAttempts.correct += Math.min(tot, corr);
+                  c.accuracy = Math.round((c.testAttempts.correct / c.testAttempts.total) * 100);
+                }
+              });
+            });
+          }
+        });
+
+        if (totalMarks === 0) {
+          alert("Please enter questions/scores for at least one chapter.");
+          return;
+        }
+      } else {
+        totalMarks = parseInt(document.getElementById('mock-quick-total').value) || 100;
+        marksObtained = parseInt(document.getElementById('mock-quick-obtained').value) || 0;
+      }
+
+      const percentage = Math.round((marksObtained / totalMarks) * 100);
+      const passed = percentage >= 40;
+
+      casc_mocks.push({
+        id: `mock_${Date.now()}`,
+        date: dateStr,
+        paperName: paperName,
+        testName: name,
+        timeTaken: timeTaken,
+        mode: currentMockMode,
+        marksObtained: marksObtained,
+        totalMarks: totalMarks,
+        percentage: percentage,
+        passed: passed,
+        chapterBreakdown: chapterBreakdown
+      });
+
+      saveData('mocks');
+      saveData('syllabus');
+      awardXP(50, `Logged Mock: ${name}`);
+      closeModal('log-mock-modal');
+      renderMocks();
+      renderSyllabus();
+    }
+
+    // --- SETTINGS TAB & SYLLABUS EDITOR ---
+    function renderSettings() {
+      document.getElementById('setting-user-name').value = casc_user.name;
+      document.getElementById('setting-exam-date').value = casc_user.examDate;
+
+      const editorContainer = document.getElementById('settings-syllabus-editor-list');
+      editorContainer.innerHTML = casc_syllabus.map((paper, pIdx) => `
+        <div style="background: var(--surface-color); padding: 12px; border-radius: 10px; border: 1px solid var(--border-color);">
+          <div style="display: flex; justify-content: space-between; align-items: center; font-weight: 700; margin-bottom: 8px;">
+            <span>${paper.paperName}</span>
+            <div style="display: flex; gap: 4px;">
+              <button class="btn btn-secondary btn-sm" onclick="renamePaperPrompt('${paper.paperId}')">Rename</button>
+              <button class="btn btn-danger btn-sm" onclick="deletePaper('${paper.paperId}')">Delete</button>
+            </div>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 6px;">
+            ${paper.chapters.map((chap, cIdx) => `
+              <div style="display: flex; align-items: center; justify-content: space-between; background: var(--card-bg); padding: 6px 10px; border-radius: 6px; font-size: 13px;">
+                <span style="flex: 1;">${chap.name}</span>
+                <div style="display: flex; gap: 4px;">
+                  <button class="btn btn-secondary btn-sm" style="min-height: 28px; padding: 2px 6px;" onclick="moveChapter('${paper.paperId}', ${cIdx}, -1)">↑</button>
+                  <button class="btn btn-secondary btn-sm" style="min-height: 28px; padding: 2px 6px;" onclick="moveChapter('${paper.paperId}', ${cIdx}, 1)">↓</button>
+                  <button class="btn btn-secondary btn-sm" style="min-height: 28px; padding: 2px 6px;" onclick="openChapterEditModal('${chap.id}')">Edit</button>
+                  <button class="btn btn-danger btn-sm" style="min-height: 28px; padding: 2px 6px;" onclick="deleteChapter('${paper.paperId}', '${chap.id}')">✕</button>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+          <button class="btn btn-secondary btn-sm" style="margin-top: 8px; width: 100%;" onclick="promptAddChapter('${paper.paperId}')">+ Add Chapter</button>
+        </div>
+      `).join('');
+    }
+
+    function saveUserSettings() {
+      const newName = document.getElementById('setting-user-name').value.trim();
+      const newDate = document.getElementById('setting-exam-date').value;
+
+      if (newName) casc_user.name = newName;
+      if (newDate) casc_user.examDate = newDate;
+
+      saveData('user');
+      renderDashboard();
+    }
+
+    function promptAddChapter(paperId) {
+      const name = prompt("Enter new chapter name:");
+      if (!name || !name.trim()) return;
+
+      const paper = casc_syllabus.find(p => p.paperId === paperId);
+      if (paper) {
+        const newId = `${paperId}_chap_${Date.now()}`;
+        paper.chapters.push(createDefaultChapterObj(paperId, newId, name.trim()));
+        saveData('syllabus');
+        renderAll();
+      }
+    }
+
+    function addNewPaperPrompt() {
+      const name = prompt("Enter new paper title:");
+      if (!name || !name.trim()) return;
+
+      const newId = `p_${Date.now()}`;
+      casc_syllabus.push({
+        paperId: newId,
+        paperName: name.trim(),
+        chapters: []
+      });
+      saveData('syllabus');
+      renderAll();
+    }
+
+    function renamePaperPrompt(paperId) {
+      const paper = casc_syllabus.find(p => p.paperId === paperId);
+      if (!paper) return;
+
+      const newName = prompt("Rename paper:", paper.paperName);
+      if (newName && newName.trim()) {
+        paper.paperName = newName.trim();
+        saveData('syllabus');
+        renderAll();
+      }
+    }
+
+    function deletePaper(paperId) {
+      if (!confirm("Are you sure you want to delete this paper and all its chapters?")) return;
+      casc_syllabus = casc_syllabus.filter(p => p.paperId !== paperId);
+      saveData('syllabus');
+      renderAll();
+    }
+
+    function deleteChapter(paperId, chapId) {
+      const paper = casc_syllabus.find(p => p.paperId === paperId);
+      if (paper) {
+        paper.chapters = paper.chapters.filter(c => c.id !== chapId);
+        saveData('syllabus');
+        renderAll();
+      }
+    }
+
+    function moveChapter(paperId, index, direction) {
+      const paper = casc_syllabus.find(p => p.paperId === paperId);
+      if (!paper) return;
+
+      const targetIdx = index + direction;
+      if (targetIdx < 0 || targetIdx >= paper.chapters.length) return;
+
+      const temp = paper.chapters[index];
+      paper.chapters[index] = paper.chapters[targetIdx];
+      paper.chapters[targetIdx] = temp;
+
+      saveData('syllabus');
+      renderAll();
+    }
+
+    // DATE SIMULATION TOOL FOR SRS & TEST OVERNIGHT
+    function applySimulatedDate() {
+      const simVal = document.getElementById('setting-sim-date').value;
+      if (!simVal) return;
+
+      casc_user.simulatedDate = simVal;
+      saveData('user');
+      runMidnightEvaluation();
+      renderAll();
+      showToast("Simulated date applied ✓");
+    }
+
+    function resetSimulatedDate() {
+      casc_user.simulatedDate = null;
+      saveData('user');
+      runMidnightEvaluation();
+      renderAll();
+      showToast("Simulated date cleared ✓");
+    }
+
+    // EXPORT & IMPORT BACKUP (PURE BACKUP ONLY)
+    function exportDataJSON() {
+      const backupObj = {
+        casc_user,
+        casc_syllabus,
+        casc_tasks,
+        casc_mocks,
+        casc_xp_log,
+        exportDate: new Date().toISOString()
+      };
+
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backupObj, null, 2));
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.setAttribute("href", dataStr);
+      downloadAnchor.setAttribute("download", `casc_backup_${getTodayStr()}.json`);
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+    }
+
+    function handleImportFileSelect(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const parsed = JSON.parse(e.target.result);
+          if (!parsed.casc_user || !parsed.casc_syllabus) {
+            alert("Invalid backup file format.");
+            return;
+          }
+
+          pendingImportData = parsed;
+          showImportPreviewModal(parsed);
+        } catch (err) {
+          alert("Error parsing JSON file: " + err.message);
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    function showImportPreviewModal(data) {
+      const statsEl = document.getElementById('import-preview-stats');
+      let paperCount = data.casc_syllabus ? data.casc_syllabus.length : 0;
+      let chapCount = 0;
+      if (data.casc_syllabus) {
+        data.casc_syllabus.forEach(p => chapCount += (p.chapters ? p.chapters.length : 0));
+      }
+
+      statsEl.innerHTML = `
+        <div>• <strong>User:</strong> ${data.casc_user.name || 'Student'} (Level ${data.casc_user.level || 0})</div>
+        <div>• <strong>Syllabus:</strong> ${paperCount} papers, ${chapCount} chapters</div>
+        <div>• <strong>Tasks:</strong> ${data.casc_tasks ? data.casc_tasks.length : 0} task records</div>
+        <div>• <strong>Mock Tests:</strong> ${data.casc_mocks ? data.casc_mocks.length : 0} test records</div>
+        <div>• <strong>Total XP:</strong> ${data.casc_user.totalXP || 0} XP</div>
+      `;
+
+      document.getElementById('import-preview-modal').classList.add('active');
+    }
+
+    function confirmExecuteImport() {
+      if (!pendingImportData) return;
+
+      localStorage.setItem('casc_user', JSON.stringify(pendingImportData.casc_user));
+      localStorage.setItem('casc_syllabus', JSON.stringify(pendingImportData.casc_syllabus));
+      localStorage.setItem('casc_tasks', JSON.stringify(pendingImportData.casc_tasks || []));
+      localStorage.setItem('casc_mocks', JSON.stringify(pendingImportData.casc_mocks || []));
+      localStorage.setItem('casc_xp_log', JSON.stringify(pendingImportData.casc_xp_log || []));
+
+      location.reload();
+    }
+
+    // RESET ALL DATA FLOW
+    function validateResetInput() {
+      const val = document.getElementById('reset-confirm-input').value.trim();
+      document.getElementById('reset-data-btn').disabled = (val !== "RESET");
+    }
+
+    function executeDataReset() {
+      if (confirm("FINAL WARNING: All study data will be permanently wiped. Proceed?")) {
+        localStorage.clear();
+        location.reload();
+      }
+    }
+
+    // --- MODAL UTILITIES ---
+    function closeModal(modalId) {
+      document.getElementById(modalId).classList.remove('active');
+    }
+
+    function openStatsModal() {
+      const rankInfo = getRankTitle(casc_user.level);
+      document.getElementById('modal-stat-level').innerText = casc_user.level;
+      document.getElementById('modal-stat-rank').innerText = rankInfo.title;
+      document.getElementById('modal-stat-xp').innerText = `${casc_user.totalXP} XP`;
+      document.getElementById('modal-stat-streak').innerText = `${casc_user.streak} days`;
+      document.getElementById('modal-stat-beststreak').innerText = `${casc_user.bestStreak} days`;
+
+      document.getElementById('stats-modal').classList.add('active');
+    }
+
+    // --- FULLSCREEN LEVEL ANIMATIONS ---
+    function triggerLevelUpOverlay(newLevel) {
+      const overlay = document.getElementById('overlay-level-up');
+      const rankInfo = getRankTitle(newLevel);
+      document.getElementById('overlay-levelup-rank').innerText = `${rankInfo.title} (Level ${newLevel})`;
+      overlay.style.display = 'flex';
+      setTimeout(() => { overlay.style.display = 'none'; }, 2500);
+    }
+
+    function triggerLevelDownOverlay(newLevel) {
+      const overlay = document.getElementById('overlay-level-down');
+      const rankInfo = getRankTitle(newLevel);
+      document.getElementById('overlay-leveldown-rank').innerText = `${rankInfo.title} (Level ${newLevel})`;
+      overlay.style.display = 'flex';
+      setTimeout(() => { overlay.style.display = 'none'; }, 2500);
+    }
+  </script>
+</body>
+</html>
